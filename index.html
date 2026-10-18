@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>統測農業概論第6章農藝(90-115學年)</title>
+    <!-- Tailwind CSS v3 官方穩定版 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+
+    <!-- 頁首標題 -->
+    <header class="bg-emerald-700 text-white shadow-md py-4 px-6 text-center">
+        <h1 class="text-xl md:text-2xl font-bold tracking-wide">
+            <strong>統測農業概論第6章農藝(90-115學年)</strong>
+        </h1>
+        <p class="text-emerald-100 text-sm mt-1">專業線上互動測驗系統</p>
+    </header>
+
+    <!-- 主要內容區 -->
+    <main class="container mx-auto px-4 py-6 max-w-3xl flex-grow">
+
+        <!-- 1. 設定畫面 -->
+        <div id="setup-screen" class="bg-white rounded-2xl shadow-lg p-6 md:p-8 space-y-6">
+            <h2 class="text-xl font-bold text-slate-700 border-b pb-3 border-slate-100 flex items-center gap-2">
+                <span>⚙️</span> 測驗選項設定
+            </h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block font-medium text-slate-600 mb-2">請選擇測驗題數：</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <label class="border rounded-xl p-3 text-center cursor-pointer hover:bg-emerald-50 transition border-slate-200 flex items-center justify-center gap-2">
+                            <input type="radio" name="num-questions" value="20" class="text-emerald-600 focus:ring-emerald-500"> 20題
+                        </label>
+                        <label class="border rounded-xl p-3 text-center cursor-pointer hover:bg-emerald-50 transition border-slate-200 flex items-center justify-center gap-2">
+                            <input type="radio" name="num-questions" value="40" class="text-emerald-600 focus:ring-emerald-500"> 40題
+                        </label>
+                        <label class="border rounded-xl p-3 text-center cursor-pointer hover:bg-emerald-50 transition border-slate-200 flex items-center justify-center gap-2">
+                            <input type="radio" name="num-questions" value="50" class="text-emerald-600 focus:ring-emerald-500"> 50題
+                        </label>
+                        <label class="border rounded-xl p-3 text-center cursor-pointer hover:bg-emerald-50 transition border-slate-200 flex items-center justify-center gap-2 checked">
+                            <input type="radio" name="num-questions" value="all" checked class="text-emerald-600 focus:ring-emerald-500"> 全部測驗
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-medium text-slate-600 mb-2">請選擇出題方式：</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="border rounded-xl p-3 text-center cursor-pointer hover:bg-emerald-50 transition border-slate-200 flex items-center justify-center gap-2">
+                            <input type="radio" name="quiz-mode" value="random" checked class="text-emerald-600 focus:ring-emerald-500"> 🔀 隨機選題
+                        </label>
+                        <label class="border rounded-xl p-3 text-center cursor-pointer hover:bg-emerald-50 transition border-slate-200 flex items-center justify-center gap-2">
+                            <input type="radio" name="quiz-mode" value="sequential" class="text-emerald-600 focus:ring-emerald-500"> 🔢 依題號順序選題
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startQuiz()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition duration-200 text-lg">
+                🚀 開始測驗
+            </button>
+        </div>
+
+        <!-- 2. 測驗進行畫面 -->
+        <div id="quiz-screen" class="hidden space-y-6">
+            <!-- 進度與計分列 -->
+            <div class="bg-white rounded-xl shadow-sm p-4 flex justify-between items-center text-sm md:text-base font-medium text-slate-600">
+                <span id="progress-indicator">題目：1 / 20</span>
+                <span id="score-indicator" class="text-emerald-600 font-bold">目前得分：0 分</span>
+            </div>
+
+            <!-- 題目卡片 -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 space-y-6">
+                <div id="question-text" class="text-lg md:text-xl font-bold text-slate-800 leading-relaxed">
+                    <!-- 動態載入題目 -->
+                </div>
+
+                <!-- 選項列表 -->
+                <div id="options-container" class="space-y-3">
+                    <!-- 動態載入選項 -->
+                </div>
+
+                <!-- 即時回饋與解析區 -->
+                <div id="feedback-box" class="hidden p-4 rounded-xl text-sm md:text-base">
+                    <!-- 即時對錯提示與詳解 -->
+                </div>
+            </div>
+
+            <!-- 導覽按鈕列 -->
+            <div class="flex justify-between items-center">
+                <button id="prev-btn" onclick="prevQuestion()" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium py-2.5 px-6 rounded-xl shadow-sm transition disabled:opacity-40 disabled:cursor-not-allowed">
+                    ⬅️ 上一題
+                </button>
+                <button id="next-btn" onclick="nextQuestion()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-6 rounded-xl shadow-sm transition">
+                    下一題 ➡️
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. 結果與錯題結算畫面 -->
+        <div id="result-screen" class="hidden bg-white rounded-2xl shadow-lg p-6 md:p-8 space-y-6">
+            <div class="text-center space-y-2 border-b pb-6 border-slate-100">
+                <h2 class="text-2xl font-bold text-slate-700">🎉 測驗結算</h2>
+                <div class="text-4xl md:text-5xl font-black text-emerald-600 my-3" id="final-score-display">100 分</div>
+                <p class="text-slate-500" id="final-stats-text">答對 50 題 / 共 50 題</p>
+            </div>
+
+            <!-- 錯題大鍋菜彙整 -->
+            <div id="wrong-container" class="space-y-4">
+                <h3 class="font-bold text-lg text-slate-700">📖 錯題大鍋菜（錯題詳解彙整）</h3>
+                <div id="wrong-list" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                    <!-- 動態填入錯題 -->
+                </div>
+            </div>
+
+            <button onclick="resetQuiz()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition duration-200 text-lg">
+                🔄 重新測驗
+            </button>
+        </div>
+
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="text-center py-4 text-xs text-slate-400">
+        統測農業概論線上測驗系統 &copy; 2026 張寶樹老師編修
+    </footer>
+
+    <!-- JavaScript 核心邏輯與完整題庫 -->
+    <script>
+        // 第6章農藝完整內嵌題庫資料（共50題）
+        const fullQuestionBank = [
+            {
+                "id": 1,
+                "question": "為育成健壯秧苗，在水稻利用育苗箱育苗過程中，宜經過下列何種處理時期？",
+                "options": { "A": "白化期", "B": "軟化期", "C": "乳熟期", "D": "硬化期" },
+                "answer": "D",
+                "explanation": "在水稻利用育苗箱育苗過程中，為使秧苗強健，通常會進行硬化期處理，以提升秧苗對外界環境的適應力。",
+                "page": 220
+            },
+            {
+                "id": 2,
+                "question": "下列有關甘藷栽培的敘述，何者正確？",
+                "options": { "A": "日夜溫差小，有利於塊根生長", "B": "生育期間喜好低溫且耐霜害", "C": "蟻象為重要害蟲之一", "D": "生育初、中期應維持土壤乾燥，以利塊根生長" },
+                "answer": "C",
+                "explanation": "甘藷栽培中，甘藷蟻象（臭鼻蟲）為危害嚴重的專屬害蟲之一；日夜溫差大較有利於塊根生長；甘藷性喜高溫且不耐霜害；生育期間水分管理須適當，初中期過度乾燥不利生長。",
+                "page": 234
+            },
+            {
+                "id": 3,
+                "question": "下列那種處理，可以減少甘藷塊根收穫後貯藏期間的腐爛？",
+                "options": { "A": "層積處理", "B": "浸水處理", "C": "癒傷處理", "D": "乙烯處理" },
+                "answer": "C",
+                "explanation": "甘藷收穫後在溫度27~33°C及相對濕度85~90%下進行4~10天的「癒傷處理」，可使機械損傷部位復原，減少腐爛並增進食味。",
+                "page": 234
+            },
+            {
+                "id": 4,
+                "question": "下列何者屬於豆科綠肥作物？",
+                "options": { "A": "甘藷", "B": "油菜", "C": "太陽麻", "D": "燕麥" },
+                "answer": "C",
+                "explanation": "太陽麻屬於豆科綠肥作物（亦具景觀功能）；油菜屬於十字花科；甘藷屬於旋花科；燕麥屬於禾本科。",
+                "page": 216
+            },
+            {
+                "id": 5,
+                "question": "「當主作物遭受病蟲等災害發生損失時，立刻改種生長快速的短期性作物。」此屬於那一 類作物？",
+                "options": { "A": "保護作物", "B": "覆蓋作物", "C": "綠肥作物", "D": "救荒作物" },
+                "answer": "D",
+                "explanation": "速成作物又稱救荒作物、短期作物或代用作物，指主作物因災害受損時，改種生長快速的短期作物以資補救。",
+                "page": 216
+            },
+            {
+                "id": 6,
+                "question": "下列有關玉米的敘述，何者正確？",
+                "options": { "A": "食用玉米，當絲狀柱頭呈光澤白色、子粒堅硬時採收", "B": "雌雄同株，為自花授粉作物", "C": "甜玉米果穗收穫後，放置過久糖分會降低", "D": "夏季栽培玉米，不易遭受螟蟲危害" },
+                "answer": "C",
+                "explanation": "甜玉米收穫後呼吸作用旺盛，放置過久或高溫下糖分會迅速轉化為澱粉而降低甜度；玉米為雌雄同株異花、異花授粉作物；夏季栽培極易遭玉米螟危害。",
+                "page": 225
+            },
+            {
+                "id": 7,
+                "question": "下列農產品中，何者碳水化合物含量較多？",
+                "options": { "A": "魚類", "B": "稻米", "C": "豬肉", "D": "牛乳" },
+                "answer": "B",
+                "explanation": "稻米屬於禾穀類作物，富含澱粉（碳水化合物），而魚類與豬肉主要成分為蛋白質與脂肪，牛乳主要含乳糖與蛋白質，故稻米碳水化合物最多。",
+                "page": 210
+            },
+            {
+                "id": 8,
+                "question": "下列何種飼料屬於精料？",
+                "options": { "A": "苜蓿", "B": "狼尾草", "C": "糖蜜", "D": "紫雲英" },
+                "answer": "C",
+                "explanation": "飼料作物中，苜蓿、狼尾草、紫雲英屬於粗飼料（青草或乾草），而糖蜜富含糖分與能量，屬於精料範疇。",
+                "page": 218
+            },
+            {
+                "id": 9,
+                "question": "下列有關水稻栽培的敘述，何者錯誤？",
+                "options": { "A": "水稻插秧深度至少要五公分以上，以免倒伏", "B": "台灣水稻的插秧期第一期作至一月至三月，第二期作至六月至八月", "C": "台灣水稻大多採移植栽培，較少採用直播栽培", "D": "台灣栽培面積最廣的作物是水稻" },
+                "answer": "A",
+                "explanation": "水稻插秧深度一般約以2~3公分或每穴3~5本為宜，插太深反而不利發育與分蘗，並非至少五公分以上。水稻為台灣栽培面積最廣之作物。",
+                "page": 220
+            },
+            {
+                "id": 10,
+                "question": "下列何種作物可以行樹宿根栽培？",
+                "options": { "A": "白菜", "B": "高粱", "C": "玉蜀黍", "D": "大豆" },
+                "answer": "B",
+                "explanation": "雜交高粱如台中1、3、5號因再生能力強，收穫後利用留樁可進行宿根栽培（甘蔗與水稻再生稻亦同）。",
+                "page": 227
+            },
+            {
+                "id": 11,
+                "question": "芋的地下莖與生長過程中變形膨大以便貯藏養分，屬於下列何者？",
+                "options": { "A": "球莖", "B": "根莖", "C": "塊莖", "D": "鱗莖" },
+                "answer": "A",
+                "explanation": "芋的地下莖膨大貯藏養分，在植物型態學上屬於「球莖」。",
+                "page": 211
+            },
+            {
+                "id": 12,
+                "question": "下列何者為目前台灣栽培面積最大的作物？",
+                "options": { "A": "菊花", "B": "茶", "C": "水稻", "D": "西瓜" },
+                "answer": "C",
+                "explanation": "水稻為臺灣栽培面積最廣之食用作物與整體農藝作物。",
+                "page": 219
+            },
+            {
+                "id": 13,
+                "question": "下列何種雜草在分類上屬於禾本科？",
+                "options": { "A": "看麥娘", "B": "球花蒿草", "C": "滿天星", "D": "藿香薊" },
+                "answer": "A",
+                "explanation": "看麥娘屬於禾本科雜草；滿天星屬於莧科；藿香薊屬於菊科。",
+                "page": 210
+            },
+            {
+                "id": 14,
+                "question": "下列何者為目前世界上收穫面積最大的栽培作物？",
+                "options": { "A": "小麥", "B": "玉米", "C": "水稻", "D": "玫瑰" },
+                "answer": "A",
+                "explanation": "在全球糧食與農藝作物中，小麥的種植與收穫面積為世界最大。",
+                "page": 210
+            },
+            {
+                "id": 15,
+                "question": "下列有關蜀黍的敘述，何者正確？",
+                "options": { "A": "雌雄同株異花", "B": "抗旱性強", "C": "果實為蒴果", "D": "原產於溫帶" },
+                "answer": "B",
+                "explanation": "蜀黍（高粱）根群發達、葉片能捲縮、具生理抗旱力，為極佳之抗旱作物。其原產熱帶，果實為穎果。",
+                "page": 225
+            },
+            {
+                "id": 16,
+                "question": "台灣目前已被認證的「池上米」，其產地為下列何者？",
+                "options": { "A": "屏東", "B": "嘉義", "C": "台東", "D": "宜蘭" },
+                "answer": "C",
+                "explanation": "馳名全國的「池上米」產地位於臺東縣。",
+                "page": 219
+            },
+            {
+                "id": 17,
+                "question": "下列有關水稻之敘述，何者錯誤？",
+                "options": { "A": "米粒腹部透明之部分稱為腹白", "B": "葉有葉舌", "C": "每一小穗花常生一朵花", "D": "屬於鬚根系植物" },
+                "answer": "A",
+                "explanation": "米粒腹部不透明之部分稱為「腹白」，中心部分稱為「心白」，而非透明部分稱為腹白。",
+                "page": 220
+            },
+            {
+                "id": 18,
+                "question": "下列有關「蜀黍」之敘述，何者正確？",
+                "options": { "A": "雌穗位於植株莖中間部位之葉腋間", "B": "抗旱性差", "C": "葉緣平直", "D": "因有根瘤菌，對氮肥需求少" },
+                "answer": "C",
+                "explanation": "蜀黍的葉緣平直（有葉舌無葉耳）；抗旱性極強；施肥以氮肥最多；根部並無共生根瘤菌。",
+                "page": 226
+            },
+            {
+                "id": 19,
+                "question": "下列有關水稻的敘述，何者為正確？",
+                "options": { "A": "高緯度地區大部分以秈稻栽培為主", "B": "一般俗稱蓬萊稻即為秈稻", "C": "宜以微酸性( pH4.5~6.5 )的黏質壤土栽種為佳", "D": "分蘗最適溫度約為10 - 15℃" },
+                "answer": "C",
+                "explanation": "水稻適宜生長於pH 4.5~6.5之微酸性黏質壤土；高緯度地區（如日本）多以稉稻為主；蓬萊稻即為稉稻（日本型）；生育最適溫約22~30°C。",
+                "page": 220
+            },
+            {
+                "id": 20,
+                "question": "稻米的米糠富含下列何種營養素？",
+                "options": { "A": "維生素 B 群", "B": "維生素 C 群", "C": "維生素 D 群", "D": "維生素 E 群" },
+                "answer": "A",
+                "explanation": "稻米的米糠及胚部富含蛋白質與維生素B群。",
+                "page": 220
+            },
+            {
+                "id": 21,
+                "question": "下列何者不屬於全球三大穀物之一？",
+                "options": { "A": "稻", "B": "小麥", "C": "玉米", "D": "大豆" },
+                "answer": "D",
+                "explanation": "全球三大穀物為稻、小麥、玉米；大豆屬於豆菽類與油料作物。",
+                "page": 210
+            },
+            {
+                "id": 22,
+                "question": "水稻莖桿的下部節位芽，可發育成新的莖稈，稱為：",
+                "options": { "A": "不定芽", "B": "分枝", "C": "分蘗", "D": "走莖" },
+                "answer": "C",
+                "explanation": "水稻莖稈下部節位之芽能發育成新莖稈，稱為「分蘗」。",
+                "page": 220
+            },
+            {
+                "id": 23,
+                "question": "下列何者為台灣秋冬裡作栽培紅豆的最適產地？",
+                "options": { "A": "嘉南平原", "B": "台北盆地", "C": "台中盆地", "D": "屏東平原" },
+                "answer": "D",
+                "explanation": "臺灣紅豆主要利用秋作或秋冬裡作栽培，最適產地為屏東平原（高雄、屏東地區）。",
+                "page": 242
+            },
+            {
+                "id": 24,
+                "question": "有關大豆之敘述，下列何者正確？",
+                "options": { "A": "臺灣栽培以台中市為主", "B": "為重要的澱粉作物", "C": "古代稱為稷", "D": "與毛豆為同一種作物" },
+                "answer": "D",
+                "explanation": "毛豆與大豆為同種植物（Glycine max），只是採收期不同（毛豆為豆粒乳熟期採收，大豆為完熟期採收）。大豆臺灣栽培以臺南市為主，為油料與植物性蛋白質作物。",
+                "page": 238
+            },
+            {
+                "id": 25,
+                "question": "有關稻之敘述，下列何者正確？",
+                "options": { "A": "栽培稻種主要包括非洲稻與亞洲稻兩種", "B": "臺灣地區以秈稻種植為主", "C": "果實稱為穎果，米只由胚與胚乳組成", "D": "屬於雙子葉多年生禾本科植物" },
+                "answer": "A",
+                "explanation": "栽培稻主要包含亞洲稻與非洲稻兩種；臺灣地區以稉稻（蓬萊米）種植為主；水稻屬於單子葉一年生草本植物；米粒結構包含種皮、胚乳與胚。",
+                "page": 219
+            },
+            {
+                "id": 26,
+                "question": "下列何者為農藝生產體系之範圍？",
+                "options": { "A": "蔬菜", "B": "花卉", "C": "庭園設計", "D": "特用作物" },
+                "answer": "D",
+                "explanation": "農藝作物一般分為食用、特用、雜用及飼用四類，故「特用作物」屬於農藝生產範圍；蔬菜屬園藝作物。",
+                "page": 210
+            },
+            {
+                "id": 27,
+                "question": "下列有關水稻之敘述，何者正確？",
+                "options": { "A": "水稻果實為蒴果", "B": "水稻為長日照作物", "C": "再生稻留樁高度以15公分為宜", "D": "第一期稻作施肥每公頃氮素220~250公斤" },
+                "answer": "C",
+                "explanation": "再生稻（宿根栽培）留樁高度以15公分為宜；水稻果實為穎果；水稻為短日照作物；第一期作氮素推薦量約120~150公斤/公頃。",
+                "page": 220
+            },
+            {
+                "id": 28,
+                "question": "下列有關大豆之敘述，何者不正確？",
+                "options": { "A": "古代稱為菽", "B": "學名為Glycine max", "C": "屬於澱粉類作物", "D": "英文名為soybean" },
+                "answer": "C",
+                "explanation": "大豆屬於豆菽類與油料、植物性蛋白質作物，而非澱粉類作物。",
+                "page": 238
+            },
+            {
+                "id": 29,
+                "question": "蓖麻屬於下列何者作物？",
+                "options": { "A": "油蠟料類作物", "B": "染料類作物", "C": "飼料類作物", "D": "嗜好類作物" },
+                "answer": "A",
+                "explanation": "蓖麻屬於油蠟料類作物（大戟科，種子榨油可供潤滑及醫藥用途）。",
+                "page": 212
+            },
+            {
+                "id": 30,
+                "question": "下列何者為落花生收穫後最適儲藏的含水量？",
+                "options": { "A": "24%", "B": "20%", "C": "16%", "D": "12%" },
+                "answer": "D",
+                "explanation": "落花生種子含蛋白質豐富易受黃麴毒素污染，必須乾燥至含水量12%以下才能安全貯藏。",
+                "page": 238
+            },
+            {
+                "id": 31,
+                "question": "下列有關胚芽米的描述，何者正確？",
+                "options": { "A": "胚芽米的脂肪含量少", "B": "色澤較白，適口性差", "C": "營養價值高且可久藏", "D": "富含多量維生素 B" },
+                "answer": "D",
+                "explanation": "胚芽米保留了米粒的胚部，富含多量維生素B群與維生素E，營養價值高。",
+                "page": 220
+            },
+            {
+                "id": 32,
+                "question": "下列何種豆類稱為「旱田之肉」？",
+                "options": { "A": "綠豆", "B": "紅豆", "C": "大豆", "D": "菜豆" },
+                "answer": "C",
+                "explanation": "大豆（黃豆）富含優質植物性蛋白質，素有「田園之肉」或「旱田之肉」的美稱。",
+                "page": 238
+            },
+            {
+                "id": 33,
+                "question": "下列有關作物的敘述，何者正確？",
+                "options": {
+                    "A": "高粱的葉片具有葉舌而無葉耳之構造",
+                    "B": "水稻葉部是由葉鞘、葉耳及葉舌三部分所組成",
+                    "C": "甘蔗的最適採收時期為蔗汁中蔗糖含量達 10 % 時",
+                    "D": "茶樹果實為蒴果，定植後第二年的壓枝可以定樹型"
+                },
+                "answer": "A",
+                "explanation": "高粱（蜀黍）葉片具有葉舌而無葉耳；水稻葉部由葉鞘、葉片、葉舌及葉耳四部分組成；甘蔗最適採收錘度Brix約20度（蔗汁蔗糖分約12~14%）；茶樹定型修剪通常在定植後第四年進行。",
+                "page": 226
+            },
+            {
+                "id": 34,
+                "question": "下列為半發酵茶的製造過程：茶菁 → ① → ② → 殺菁 → ③ → 解塊 → 初乾 → 團揉及覆焙 → ④ → 成品 ，① ② ③ ④ 依序為何？",
+                "options": {
+                    "A": "① 日光萎凋； ② 室內萎凋、攪拌； ③ 揉捻； ④ 再乾",
+                    "B": "① 室內萎凋； ② 日光萎凋、攪拌； ③ 揉捻； ④ 再乾",
+                    "C": "① 日光萎凋； ② 室內萎凋、攪拌； ③ 揉捻； ④ 再發酵",
+                    "D": "① 室內萎凋； ② 日光萎凋、攪拌； ③ 揉捻； ④ 再發酵"
+                },
+                "answer": "A",
+                "explanation": "半發酵茶（如包種茶、烏龍茶）標準初製流程為：茶菁 → 日光萎凋 → 室內萎凋及攪拌 → 殺菁 → 揉捻 → 解塊 → 初乾 → 覆焙 → 再乾（④為再乾）。",
+                "page": 232
+            },
+            {
+                "id": 35,
+                "question": "半發酵茶的製造過程可以生產下列哪些茶葉？",
+                "options": { "A": "煎茶、龍井茶", "B": "烏龍茶、包種茶", "C": "烏龍茶、龍井茶", "D": "臺灣紅茶、普洱茶" },
+                "answer": "B",
+                "explanation": "烏龍茶與包種茶均屬於半發酵茶類；煎茶與龍井茶屬於不發酵茶（綠茶）；臺灣紅茶屬全發酵茶。",
+                "page": 232
+            },
+            {
+                "id": 36,
+                "question": "玉米罐頭是生活常見的食品，該如何判斷玉米的最適採收時期？",
+                "options": { "A": "雌蕊心未乾時", "B": "籽粒變坍塌及光滑時", "C": "莖葉變黃、苞葉枯白時", "D": "花絲變褐色、籽粒充實時" },
+                "answer": "D",
+                "explanation": "食用玉米當花絲變褐色、子粒充實飽滿時即為適當採收期（甜玉米更應在乳熟期及早採收以防糖分降低）。",
+                "page": 225
+            },
+            {
+                "id": 37,
+                "question": "下列有關玉米和蜀黍差異的敘述，何者正確？",
+                "options": {
+                    "A": "玉米葉基大，蜀黍則小",
+                    "B": "玉米葉片平直，蜀黍則皺褶",
+                    "C": "玉米葉中脈脊低，蜀黍則高",
+                    "D": "玉米葉厚而小，蜀黍則寬而大"
+                },
+                "answer": "A",
+                "explanation": "依課本比較表：玉米葉片邊緣皺褶、中脈低、葉基大、有葉耳；蜀黍葉片邊緣平直、中脈高（青白界限分明）、葉基小、無葉耳。",
+                "page": 226
+            },
+            {
+                "id": 38,
+                "question": "安琪參加南投茶葉博覽會，體驗茶的手作活動，得知紅茶與綠茶在製程上的差異，下列敘述何者正確？",
+                "options": {
+                    "A": "紅茶需經過殺菁處理，綠茶則否",
+                    "B": "紅茶為半發酵茶，綠茶則是不發酵茶",
+                    "C": "紅茶有經過萎凋處理，綠茶則是經過殺菁處理",
+                    "D": "兩種茶葉製程中都經過揉捻，綠茶需要發酵處理"
+                },
+                "answer": "C",
+                "explanation": "紅茶為全發酵茶，製程中不須殺菁但須經過萎凋與揉捻；綠茶為不發酵茶，製程中必須經過「殺菁」以破壞酶活性，不經發酵。",
+                "page": 232
+            },
+            {
+                "id": 39,
+                "question": "青農阿虎參加政府計畫回家鄉種植水稻，下列何種田間管理方式，可增加水稻有效分蘗數？",
+                "options": { "A": "斷水曬田", "B": "定期除草", "C": "增加氮肥用量", "D": "減少農藥施用量" },
+                "answer": "A",
+                "explanation": "分蘗終期至幼穗形成期進行「斷水曬田」，可控制無效分蘗、促進根系發育並增加有效分蘗數。",
+                "page": 220
+            },
+            {
+                "id": 40,
+                "question": "近年來，由於氣候變遷，導致水稻產業備受衝擊，研究單位積極進行舒緩產業壓力之相關研究，其中備受重視的水稻栽培模式，具備不須再整地、插秧，但須留樁高度15公分等特性。此特別之栽培模式稱為：",
+                "options": { "A": "直播栽培", "B": "湛水栽培", "C": "宿根栽培", "D": "輪作栽培" },
+                "answer": "C",
+                "explanation": "再生稻（宿根栽培）利用收穫後的稻樁（留樁高度以15公分為宜）重新萌發新芽生長，不需重新整地與插秧。",
+                "page": 222
+            },
+            {
+                "id": 41,
+                "question": "下列有關臺灣包種茶分類與製程的敘述，何者正確？",
+                "options": {
+                    "A": "不發酵茶；茶菁 → 殺菁 → 揉捻 → 乾燥 → 毛茶",
+                    "B": "半發酵茶；茶菁 → 萎凋 → 揉捻 → 解塊 → 發酵 → 乾燥 → 毛茶",
+                    "C": "半發酵茶；茶菁 → 日光萎凋 → 室內萎凋及攪拌 → 殺菁 → 揉捻 → 解塊 → 初乾 → 覆焙→ 再乾 → 毛茶",
+                    "D": "全發酵茶；茶菁 → 日光萎凋 → 室內萎凋及攪拌 → 殺菁 → 揉捻 → 解塊 → 初乾 → 覆焙→ 補足發酵 → 再乾 → 毛茶"
+                },
+                "answer": "C",
+                "explanation": "包種茶屬於半發酵茶，標準初製流程包含日光萎凋、室內萎凋及攪拌、殺菁、揉捻、解塊、初乾、覆焙、再乾等步驟。",
+                "page": 232
+            },
+            {
+                "id": 42,
+                "question": "隨著經濟水準提高，消費者對鮮食玉米多樣化需求逐年增加。下列有關「玉米筍」採收最佳時期的敘述，何者正確？",
+                "options": {
+                    "A": "當雌花花絲變褐色時",
+                    "B": "當籽粒充實時",
+                    "C": "莖葉變黃、包葉枯白時",
+                    "D": "當雌花吐絲後3～5日"
+                },
+                "answer": "D",
+                "explanation": "玉米筍為幼嫩的玉米果穗，通常在雌花吐絲後3~5日內（採收未授精或剛受精的小果穗）進行採收。",
+                "page": 225
+            },
+            {
+                "id": 43,
+                "question": "下列有關特用作物的敘述，何者正確？",
+                "options": {
+                    "A": "薄荷是藥用作物",
+                    "B": "葛鬱金是香料作物",
+                    "C": "瓊麻是澱粉作物",
+                    "D": "漆樹是油臘料類作物"
+                },
+                "answer": "A",
+                "explanation": "薄荷屬於藥料類作物；葛鬱金屬於澱粉料類作物；瓊麻屬於纖維料類作物。",
+                "page": 212
+            },
+            {
+                "id": 44,
+                "question": "下列有關作物科別的敘述，何者正確？",
+                "options": {
+                    "A": "蕎麥屬於禾本科",
+                    "B": "甘藷屬於大戟科",
+                    "C": "蓮霧屬於桃金孃科",
+                    "D": "胡蘿蔔屬於十字花科"
+                },
+                "answer": "C",
+                "explanation": "蓮霧屬於桃金孃科；蕎麥屬於蓼科；甘藷屬於旋花科。",
+                "page": 210
+            },
+            {
+                "id": 45,
+                "question": "下列有關臺灣常見食用作物的敘述，何者錯誤？",
+                "options": {
+                    "A": "甘蔗為圓錐狀花序，果實為穎果",
+                    "B": "甘藷植苗法較植藷法更具備省工及省地",
+                    "C": "蜀黍葉片厚而狹小，玉蜀黍葉片寬大而薄",
+                    "D": "水稻栽培在低緯度地區以秈稻為主，高緯度地區以稉稻為主"
+                },
+                "answer": "B",
+                "explanation": "甘藷一般採用「藷蔓扦插法」，而非植藷法（塊根種植），植苗法相對於塊根種植較為省工省地。其餘選項皆正確。",
+                "page": 220
+            },
+            {
+                "id": 46,
+                "question": "下列有關茶葉敘述，何者正確？",
+                "options": {
+                    "A": "大葉種的青心烏龍適合製成全發酵烏龍茶",
+                    "B": "大葉種的青心大冇適合製成不發酵綠茶",
+                    "C": "小葉種的阿薩姆種適合製成半發酵紅茶",
+                    "D": "小葉種的臺茶12號 ( 金萱 ) 適合製成半發酵包種茶"
+                },
+                "answer": "D",
+                "explanation": "臺茶12號（金萱）為小葉種，適合製成半發酵包種茶或烏龍茶；大葉種茶多酚含量高適合製紅茶，小葉種適合製綠茶或包種茶。",
+                "page": 231
+            },
+            {
+                "id": 47,
+                "question": "下列何種作物的籽實為目前最重要的「植物性蛋白質」來源？",
+                "options": { "A": "紅豆", "B": "豇豆", "C": "豌豆", "D": "大豆" },
+                "answer": "D",
+                "explanation": "大豆（黃豆）子葉富含豐富的植物性蛋白質，是目前最重要的植物性蛋白質與油料作物來源。",
+                "page": 238
+            },
+            {
+                "id": 48,
+                "question": "下列何種作物屬於旋花科？",
+                "options": { "A": "甘藍", "B": "甘藷", "C": "薏苡", "D": "蕎麥" },
+                "answer": "B",
+                "explanation": "甘藷（Ipomoea batatas）在植物學分類上屬於旋花科。",
+                "page": 233
+            },
+            {
+                "id": 49,
+                "question": "臺灣諺語「呷土豆，乎汝呷到老老老」，諺語中所指的土豆 ( 落花生 ) 是屬於下列哪一種作物分類？",
+                "options": {
+                    "A": "食用作物分類中的禾穀類",
+                    "B": "食用作物分類中的豆菽類",
+                    "C": "特用作物分類中的嗜好類",
+                    "D": "特用作物分類中的澱粉類"
+                },
+                "answer": "B",
+                "explanation": "落花生（土豆）屬於豆科作物，在食用作物分類中屬於豆菽類作物（亦可榨油作為油料作物）。",
+                "page": 211
+            },
+            {
+                "id": 50,
+                "question": "下列何種作物的根部與根瘤菌共生時，可行固氮作用？",
+                "options": { "A": "玉米", "B": "水稻", "C": "甘蔗", "D": "苜蓿" },
+                "answer": "D",
+                "explanation": "苜蓿、落花生、大豆等均屬於豆科作物，根部常與根瘤菌共生以固定空氣中的游離氮素。",
+                "page": 218
+            }
+        ];
+
+        // 應用程式狀態變數
+        let currentQuizQuestions = [];
+        let currentIndex = 0;
+        let userAnswers = {}; // 紀錄使用者作答：{ 題目索引: 選擇的答案 }
+        let scorePerQuestion = 5; // 假設滿分100，會依實際抽題數動態調整
+
+        // 洗牌演算法 (Fisher-Yates)
+        function shuffleArray(array) {
+            let arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                let j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // 開始測驗
+        function startQuiz() {
+            // 取得設定值
+            const numVal = document.querySelector('input[name="num-questions"]:checked').value;
+            const modeVal = document.querySelector('input[name="quiz-mode"]:checked').value;
+
+            // 處理題數
+            let pool = [...fullQuestionBank];
+            if (modeVal === 'random') {
+                pool = shuffleArray(pool);
+            }
+
+            let selectCount = pool.length;
+            if (numVal !== 'all') {
+                selectCount = parseInt(numVal, 10);
+                if (selectCount > pool.length) selectCount = pool.length;
+            }
+
+            currentQuizQuestions = pool.slice(0, selectCount);
+            
+            // 計算每題配分（總分100分）
+            scorePerQuestion = 100 / currentQuizQuestions.length;
+
+            // 初始化狀態
+            currentIndex = 0;
+            userAnswers = {};
+
+            // 切換畫面
+            document.getElementById('setup-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+
+            renderQuestion();
+        }
+
+        // 渲染目前題目
+        function renderQuestion() {
+            const q = currentQuizQuestions[currentIndex];
+            const total = currentQuizQuestions.length;
+
+            // 更新進度與即時得分
+            document.getElementById('progress-indicator').innerText = `題目：${currentIndex + 1} / ${total}`;
+            updateLiveScore();
+
+            // 渲染題目文字
+            document.getElementById('question-text').innerHTML = `<span class="text-emerald-600 mr-2">(${currentIndex + 1})</span>${q.question}`;
+
+            // 渲染選項
+            const container = document.getElementById('options-container');
+            container.innerHTML = '';
+
+            const userSelected = userAnswers[currentIndex];
+            const isAnswered = userSelected !== undefined;
+
+            for (let key in q.options) {
+                let btn = document.createElement('button');
+                let baseClass = "w-full text-left p-4 rounded-xl border transition flex items-center justify-between font-medium ";
+                
+                if (!isAnswered) {
+                    baseClass += "border-slate-200 hover:bg-emerald-50 hover:border-emerald-300 text-slate-700 bg-white cursor-pointer";
+                } else {
+                    // 已經作答過，鎖定並標示顏色
+                    if (key === q.answer) {
+                        baseClass += "border-emerald-500 bg-emerald-50 text-emerald-800 font-bold";
+                    } else if (key === userSelected) {
+                        baseClass += "border-rose-500 bg-rose-50 text-rose-800";
+                    } else {
+                        baseClass += "border-slate-200 bg-white text-slate-400 opacity-60";
+                    }
+                }
+
+                btn.className = baseClass;
+                btn.innerHTML = `<span><strong class="mr-2">${key}.</strong> ${q.options[key]}</span>`;
+                
+                if (!isAnswered) {
+                    btn.onclick = () => selectAnswer(key);
+                } else {
+                    btn.disabled = true;
+                }
+
+                container.appendChild(btn);
+            }
+
+            // 處理即時回饋與詳解區顯示
+            const feedbackBox = document.getElementById('feedback-box');
+            if (isAnswered) {
+                feedbackBox.classList.remove('hidden');
+                if (userSelected === q.answer) {
+                    feedbackBox.className = "p-4 rounded-xl text-sm md:text-base bg-emerald-100 text-emerald-900 border border-emerald-300";
+                    feedbackBox.innerHTML = `✅ <strong>回答正確！</strong><br><span class="mt-1 block text-slate-700">📖 <strong>詳解：</strong>${q.explanation} (課本第 ${q.page} 頁)</span>`;
+                } else {
+                    feedbackBox.className = "p-4 rounded-xl text-sm md:text-base bg-rose-100 text-rose-900 border border-rose-300";
+                    feedbackBox.innerHTML = `❌ <strong>回答錯誤！</strong> 正確答案是 <span class="font-bold underline">${q.answer}</span>。<br><span class="mt-1 block text-slate-700">📖 <strong>詳解：</strong>${q.explanation} (課本第 ${q.page} 頁)</span>`;
+                }
+            } else {
+                feedbackBox.classList.add('hidden');
+                feedbackBox.innerHTML = '';
+            }
+
+            // 按鈕狀態控制
+            document.getElementById('prev-btn').disabled = currentIndex === 0;
+            const nextBtn = document.getElementById('next-btn');
+            if (currentIndex === total - 1) {
+                nextBtn.innerText = "📊 結束測驗看成績";
+                nextBtn.className = "bg-amber-600 hover:bg-amber-700 text-white font-medium py-2.5 px-6 rounded-xl shadow-sm transition";
+            } else {
+                nextBtn.innerText = "下一題 ➡️";
+                nextBtn.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-2.5 px-6 rounded-xl shadow-sm transition";
+            }
+        }
+
+        // 使用者選擇答案
+        function selectAnswer(optionKey) {
+            userAnswers[currentIndex] = optionKey;
+            renderQuestion();
+        }
+
+        // 即時計算目前得分
+        function updateLiveScore() {
+            let correctCount = 0;
+            for (let idx in userAnswers) {
+                if (userAnswers[idx] === currentQuizQuestions[idx].answer) {
+                    correctCount++;
+                }
+            }
+            let currentScore = Math.round(correctCount * scorePerQuestion);
+            document.getElementById('score-indicator').innerText = `目前得分：${currentScore} 分`;
+        }
+
+        // 上一題
+        function prevQuestion() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderQuestion();
+            }
+        }
+
+        // 下一題或交卷
+        function nextQuestion() {
+            if (currentIndex < currentQuizQuestions.length - 1) {
+                currentIndex++;
+                renderQuestion();
+            } else {
+                finishQuiz();
+            }
+        }
+
+        // 結束測驗並結算
+        function finishQuiz() {
+            let correctCount = 0;
+            let wrongItems = [];
+
+            currentQuizQuestions.forEach((q, idx) => {
+                const uAns = userAnswers[idx];
+                if (uAns === q.answer) {
+                    correctCount++;
+                } else {
+                    wrongItems.push({
+                        no: idx + 1,
+                        question: q.question,
+                        options: q.options,
+                        userAnswer: uAns || "未作答",
+                        correctAnswer: q.answer,
+                        explanation: q.explanation,
+                        page: q.page
+                    });
+                }
+            });
+
+            let finalScore = Math.round(correctCount * scorePerQuestion);
+
+            // 切換畫面
+            document.getElementById('quiz-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            // 顯示總分與統計
+            document.getElementById('final-score-display').innerText = `${finalScore} 分`;
+            document.getElementById('final-stats-text').innerText = `共 ${currentQuizQuestions.length} 題，答對 ${correctCount} 題，答錯 ${currentQuizQuestions.length - correctCount} 題`;
+
+            // 渲染錯題大鍋菜
+            const wrongListContainer = document.getElementById('wrong-list');
+            wrongListContainer.innerHTML = '';
+
+            if (wrongItems.length === 0) {
+                wrongListContainer.innerHTML = `<div class="p-6 bg-emerald-50 text-emerald-800 rounded-xl text-center font-medium">太厲害了！全部答對，沒有錯題！🎉</div>`;
+            } else {
+                wrongItems.forEach(item => {
+                    let card = document.createElement('div');
+                    card.className = "p-4 rounded-xl border border-rose-200 bg-rose-50/40 space-y-2 text-sm md:text-base";
+                    
+                    let optionsHtml = '';
+                    for(let k in item.options) {
+                        let isCorrect = k === item.correctAnswer;
+                        let isUserWrong = k === item.userAnswer;
+                        let style = "block p-1 rounded ";
+                        if(isCorrect) style += "bg-emerald-100 text-emerald-800 font-bold";
+                        else if(isUserWrong) style += "bg-rose-100 text-rose-800 line-through";
+                        optionsHtml += `<div class="${style}">${k}. ${item.options[k]}</div>`;
+                    }
+
+                    card.innerHTML = `
+                        <div class="font-bold text-slate-800">第 ${item.no} 題：${item.question}</div>
+                        <div class="space-y-1 my-2">${optionsHtml}</div>
+                        <div class="text-xs md:text-sm text-slate-600 bg-white p-3 rounded-lg border border-slate-200 space-y-1">
+                            <div>您的作答：<span class="font-bold text-rose-600">${item.userAnswer}</span> ｜ 正確答案：<span class="font-bold text-emerald-600">${item.correctAnswer}</span></div>
+                            <div class="text-slate-700 mt-1">📖 <strong>詳解：</strong>${item.explanation} (課本第 ${item.page} 頁)</div>
+                        </div>
+                    `;
+                    wrongListContainer.appendChild(card);
+                });
+            }
+        }
+
+        // 重新測驗
+        function resetQuiz() {
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('setup-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
